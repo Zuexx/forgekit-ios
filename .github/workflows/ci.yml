@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build and test
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install Tuist
+        run: brew install tuist
+
+      - uses: pnpm/action-setup@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install the workflow toolchain
+        run: pnpm install --frozen-lockfile
+
+      # The full local gate, unchanged: generate the project from the manifest, then build and
+      # test it on whichever simulator the runner has -- verify.sh resolves one rather than
+      # naming it, which is what keeps this step working across Xcode image updates.
+      - name: Verify
+        run: pnpm verify

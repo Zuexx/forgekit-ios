@@ -1,0 +1,16 @@
+# Tuist generates these; the manifest is the source of truth.
+*.xcodeproj/
+*.xcworkspace/
+.build/
+Derived/
+.tuist/
+
+node_modules/
+.DS_Store
+xcuserdata/
+
+# CodeGraph local symbol index — regenerate with `pnpm exec codegraph index`
+.codegraph/
+
+# Claude Code local overrides
+.claude/settings.local.json

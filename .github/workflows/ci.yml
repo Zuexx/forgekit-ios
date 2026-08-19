@@ -20,7 +20,7 @@ jobs:
       - name: Install Tuist
         run: brew install tuist
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
 
       - name: Set up Node
         uses: actions/setup-node@v6

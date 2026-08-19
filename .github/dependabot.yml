@@ -1,0 +1,35 @@
+version: 2
+
+updates:
+  # The workflow tooling tracks the newest release its version policy permits, and nobody
+  # remembers to check. A bump here can change whether openspec/config.yaml still yields its
+  # rules, which nothing in CI would notice — run `pnpm preflight` before merging one.
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 3
+    commit-message:
+      prefix: chore(deps)
+    groups:
+      workflow-tooling:
+        patterns:
+          - "*"
+
+  # There are no Swift package dependencies yet. This block is here so that the first one added
+  # to Project.swift is tracked from the day it lands, rather than whenever someone remembers
+  # to come back and wire this up.
+  - package-ecosystem: swift
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: chore(deps)
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: chore(deps)

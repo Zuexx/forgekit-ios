@@ -110,7 +110,7 @@ that marker — its `context:` block — plus `scripts/verify.sh`, `package.json
 The stack half of preflight is declared, not hardcoded, in `package.json`:
 
 ```jsonc
-"forgekit": {
+"workflow": {
   "sourceGlobs":   ["*.swift"],
   "requiredTools": ["tuist", "xcodebuild"]
 }

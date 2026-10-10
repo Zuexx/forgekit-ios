@@ -14,6 +14,21 @@ require_command tuist
 require_command xcodebuild
 require_command xcrun
 
+# The installed tuist CLI (brew cask binary) has no auto-switching mechanism: a
+# `.tuist-version` file sitting next to it is simply never read (confirmed by pointing one at a
+# bogus version and observing tuist ignore it). So the only way to catch local/CI drift is to
+# pin the verified-working version here and fail loudly the moment the installed CLI disagrees,
+# rather than silently trusting whatever `brew install tuist` happens to resolve that day.
+if [ -f .tuist-version ]; then
+  REQUIRED_TUIST_VERSION="$(tr -d '[:space:]' < .tuist-version)"
+  INSTALLED_TUIST_VERSION="$(tuist version 2>/dev/null | tr -d '[:space:]')"
+  if [ "$INSTALLED_TUIST_VERSION" != "$REQUIRED_TUIST_VERSION" ]; then
+    echo "tuist version mismatch: .tuist-version pins $REQUIRED_TUIST_VERSION but the installed tuist reports $INSTALLED_TUIST_VERSION" >&2
+    echo "install the pinned version, or update .tuist-version once the new version has been verified" >&2
+    exit 1
+  fi
+fi
+
 # The scheme/workspace name is derived from Project.swift's appName rather than hardcoded:
 # renaming a product happens by editing that one line, and a literal fallback here would mean
 # this script keeps testing "ForgeKit" after the project has been renamed to something else.

@@ -11,6 +11,12 @@ final class SampleListModel {
         case failed(String)
     }
 
+    // The fallback shown to the user for any error that isn't a `SampleResourceLoadFailure`.
+    // Never substitute `String(describing: error)` here: this is template code meant to be
+    // copied into a real provider, and a provider talking to a real backend can throw
+    // `URLError`, a decode failure, or other internal detail that must not reach the UI.
+    static let genericFailureMessage = "Something went wrong. Please try again."
+
     private(set) var state: State = .idle
 
     private let provider: SampleResourceProviding
@@ -26,7 +32,10 @@ final class SampleListModel {
         } catch let failure as SampleResourceLoadFailure {
             state = .failed(failure.reason)
         } catch {
-            state = .failed(String(describing: error))
+            // The real error is logged here, not discarded — it just never becomes the
+            // user-facing reason.
+            print("SampleListModel.load failed with an unexpected error: \(error)")
+            state = .failed(Self.genericFailureMessage)
         }
     }
 }

@@ -12,6 +12,20 @@ private struct StubProvider: SampleResourceProviding {
     }
 }
 
+// Distinct from `SampleResourceLoadFailure` on purpose: it exercises the model's catch-all
+// branch, which must never surface an arbitrary error's raw description to the UI.
+private struct UnexpectedError: Error {
+    let detail: String
+}
+
+private struct ThrowingProvider: SampleResourceProviding {
+    let error: Error
+
+    func load() async throws -> [SampleResource] {
+        throw error
+    }
+}
+
 @MainActor
 struct SampleListModelTests {
     @Test
@@ -33,5 +47,18 @@ struct SampleListModelTests {
         await model.load()
 
         #expect(model.state == .failed("no network"))
+    }
+
+    @Test
+    func loadFallsBackToAFixedGenericMessageForUnexpectedErrors() async {
+        let model = SampleListModel(
+            provider: ThrowingProvider(error: UnexpectedError(detail: "https://internal.example/debug?token=secret"))
+        )
+
+        await model.load()
+
+        // The failure reason must be the fixed generic message, never the raw error
+        // description — which would leak `UnexpectedError`'s internal detail into the UI.
+        #expect(model.state == .failed(SampleListModel.genericFailureMessage))
     }
 }

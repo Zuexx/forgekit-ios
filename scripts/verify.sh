@@ -29,7 +29,15 @@ if [ -f .tuist-version ]; then
   fi
 fi
 
-SCHEME="${SCHEME:-ForgeKit}"
+# The scheme/workspace name is derived from Project.swift's appName rather than hardcoded:
+# renaming a product happens by editing that one line, and a literal fallback here would mean
+# this script keeps testing "ForgeKit" after the project has been renamed to something else.
+DEFAULT_SCHEME=$(grep -m1 '^let appName = ' Project.swift | sed -E 's/^let appName = "(.*)"$/\1/')
+if [ -z "$DEFAULT_SCHEME" ]; then
+  echo "could not derive appName from Project.swift — set SCHEME explicitly" >&2
+  exit 1
+fi
+SCHEME="${SCHEME:-$DEFAULT_SCHEME}"
 
 echo "==> tuist generate"
 tuist generate --no-open || exit 1
